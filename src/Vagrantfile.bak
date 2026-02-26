@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  #config.vm.box = "base"
+    config.vm.box = "ubuntu/jammy64"
+    #config.vm.box_url = "file:///home/salomy/Documents/programming/School_21/DO7_Docker_Compose.ID_1219717-1/src/trusty.box"
+    
+    # Sync Folders
+    config.vm.synced_folder "./02/",  "/home/vagrant/scripts",  create: true
+    config.vm.synced_folder "./01/",  "/home/vagrant/dcompose",  create: true
+    config.vm.synced_folder "./services/",  "/home/vagrant/services",  create: true
+
+    config.vm.define "server01" do |server01|
+      server01.vm.box = "ubuntu/jammy64"
+      #server01.vm.box_url = "file:///root/trusty.box"
+      server01.vm.hostname = "server01"
+      server01.vm.network "private_network", ip: "192.168.56.10"
+      server01.vm.network "forwarded_port", guest: 8081, host: 8081
+      server01.vm.network "forwarded_port", guest: 8087, host: 8087
+      server01.vm.network "forwarded_port", guest: 8087, host: 9000
+      
+      
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = "8192"
+      vb.cpus   = "6"
+      vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    end
+    
+    server01.vm.provision "shell", path: "./02/setup.sh"
+  end
+end
